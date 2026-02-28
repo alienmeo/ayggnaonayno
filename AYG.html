@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Gap AI - Programming Edition</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{
+    font-family: 'Segoe UI', sans-serif;
+    margin:0;
+    background:#0f172a;
+    color:white;
+}
+header{
+    text-align:center;
+    padding:30px;
+}
+.container{
+    max-width:1000px;
+    margin:auto;
+    padding:20px;
+}
+.card{
+    background:#1e293b;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
+input{
+    width:70px;
+    padding:6px;
+}
+button{
+    background:#38bdf8;
+    border:none;
+    padding:10px 20px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+button:hover{
+    background:#0ea5e9;
+}
+.high{ color:#ef4444; font-weight:bold; }
+.medium{ color:#facc15; }
+.low{ color:#22c55e; }
+.report-item{
+    border-bottom:1px solid #334155;
+    padding:10px 0;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Knowledge Gap AI – Programming</h1>
+<p>Phát hiện lỗ hổng lập trình</p>
+</header>
+
+<div class="container">
+
+<div class="card">
+<h2>Nhập số lỗi bạn mắc phải</h2>
+
+<p>Biến & Kiểu dữ liệu: <input type="number" id="variables" value="0" min="0"></p>
+<p>Câu điều kiện: <input type="number" id="condition" value="0" min="0"></p>
+<p>Vòng lặp: <input type="number" id="loop" value="0" min="0"></p>
+<p>Hàm: <input type="number" id="function" value="0" min="0"></p>
+<p>Mảng: <input type="number" id="array" value="0" min="0"></p>
+<p>Thuật toán: <input type="number" id="algorithm" value="0" min="0"></p>
+<p>Debug & Logic: <input type="number" id="debug" value="0" min="0"></p>
+
+<br>
+<button onclick="analyze()">Phân tích</button>
+</div>
+
+<div class="card">
+<h2>Báo cáo</h2>
+<div id="report">Chưa có dữ liệu.</div>
+</div>
+
+<div class="card">
+<h2>Biểu đồ</h2>
+<canvas id="chart"></canvas>
+</div>
+
+</div>
+
+<script>
+let chartInstance=null;
+
+function analyze(){
+
+// LẤY DỮ LIỆU ĐÚNG CÁCH
+let variables=parseInt(document.getElementById("variables").value)||0;
+let condition=parseInt(document.getElementById("condition").value)||0;
+let loop=parseInt(document.getElementById("loop").value)||0;
+let func=parseInt(document.getElementById("function").value)||0;
+let array=parseInt(document.getElementById("array").value)||0;
+let algorithm=parseInt(document.getElementById("algorithm").value)||0;
+let debug=parseInt(document.getElementById("debug").value)||0;
+
+let total=variables+condition+loop+func+array+algorithm+debug;
+
+if(total===0){
+document.getElementById("report").innerHTML="Vui lòng nhập dữ liệu để phân tích.";
+return;
+}
+
+let topics=[
+{ name:"Biến & Kiểu dữ liệu", value:variables, weight:1.2 },
+{ name:"Câu điều kiện", value:condition, weight:1.2 },
+{ name:"Vòng lặp", value:loop, weight:1.3 },
+{ name:"Hàm", value:func, weight:1.4 },
+{ name:"Mảng", value:array, weight:1.3 },
+{ name:"Thuật toán", value:algorithm, weight:1.6 },
+{ name:"Debug & Logic", value:debug, weight:1.5 }
+];
+
+topics.forEach(t=>{
+t.priority=t.value*t.weight;
+});
+
+topics.sort((a,b)=>b.priority-a.priority);
+
+let reportHTML="";
+topics.forEach(t=>{
+let level="low";
+if(t.priority>=8) level="high";
+else if(t.priority>=4) level="medium";
+
+reportHTML+=`
+<div class="report-item">
+<h3>${t.name}</h3>
+<p>Số lỗi: ${t.value}</p>
+<p>Mức ưu tiên: <span class="${level}">${level.toUpperCase()}</span></p>
+</div>
+`;
+});
+
+document.getElementById("report").innerHTML=reportHTML;
+
+generateChart(topics);
+}
+
+function generateChart(data){
+
+let ctx=document.getElementById("chart").getContext("2d");
+
+if(chartInstance){
+chartInstance.destroy();
+}
+
+chartInstance=new Chart(ctx,{
+type:"radar",
+data:{
+labels:data.map(t=>t.name),
+datasets:[{
+label:"Mức độ lỗ hổng",
+data:data.map(t=>t.priority),
+backgroundColor:"rgba(56,189,248,0.2)",
+borderColor:"#38bdf8",
+borderWidth:2
+}]
+},
+options:{
+scales:{
+r:{ beginAtZero:true }
+}
+}
+});
+}
+</script>
+
+</body>
+</html>
